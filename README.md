@@ -90,13 +90,13 @@ npm run build
 - `xlsx2tex_includes_commented_package_hints`：输出包含 package hints（`tests/pubtab.test.ts`）。
 - `xlsx2tex_package_hints_include_graphicx_when_resizebox_enabled`：resizebox 时包含 `graphicx` hint（`tests/pubtab.test.ts`）。
 - `tex2xlsx_directory_input_exports_all_tex_files`：目录批量 `.tex` -> `.xlsx`（`tests/pubtab.test.ts`）。
+- `test_tex_to_xlsx_dimensions / values_match / merged_cells`：基于 fixtures 的 `.tex -> .xlsx` 维度、值、合并范围对齐（`tests/fixtures.tex2xlsx.test.ts`，fixtures 在 `tests/fixtures`）。
+- `test_xlsx_to_tex_roundtrip`：基于 fixtures 的 `.xlsx -> .tex -> (parse) TableData` 维度一致（`tests/fixtures.xlsx2tex-roundtrip.test.ts`）。
 - 额外：fixture 语义对比（`.tmp/table1.xlsx` vs pubtab 输出 `.tmp/tex1_sheet01/02.tex`；缺文件自动跳过）。
 - `readTex <-> render` 最小往返结构测试（`tests/pubtab.test.ts`）。
 
 ### TODO（原版存在但本仓库尚未覆盖）
 
-- `test_tex_to_xlsx_dimensions / values_match / merged_cells`：从 `.tex` 生成 `.xlsx` 的维度、值、合并范围对齐。
-- `test_xlsx_to_tex_roundtrip`：`.xlsx -> .tex -> (parse) TableData` 的维度一致（以及更强的值一致回归）。
 - `test_preview_*` 与 `test_preview_download_*`：preview 管线与 TinyTeX/缺包安装相关（我们未实现 preview）。
 - `test_read_excel_trims_*`：Excel 读取裁剪逻辑（我们已覆盖核心裁剪，但尚未逐条迁移所有原版测试）。
 - `test_tex_reader_*` 大量容错与语义解析用例（我们目前只做最小解析与保守剥壳）。
