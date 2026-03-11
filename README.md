@@ -105,6 +105,7 @@ npm run build
 
 ## 目录与参考
 
-- Python 原版参考：`./.pubtab-python`；这个目录在.gitignore里，开发前请先 git clone https://ghfast.top/github.com/Galaxy-Dawn/pubtab.git ./.pubtab-python。
+- Fixtures（已提交到仓库）：`tests/fixtures`（来源于 Python 原版 `./.pubtab-python/tests/fixtures`，用于 round-trip ground truth 测试）。
+- Python 原版参考：`./.pubtab-python`（该目录在 `.gitignore` 里；只有在你想更新 fixtures、对照更多 pytest 用例或比对实现细节时才需要 clone）。
 - 本仓库测试：`tests/pubtab.test.ts`
 - 主要实现：`src/excel.ts`, `src/texReader.ts`, `src/renderer.ts`
