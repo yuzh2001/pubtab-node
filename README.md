@@ -24,9 +24,9 @@
 - 已实现：合并单元格“非 master 置空”的语义（避免重复值）。
 - 已实现：输出头部包含注释版 package hints（`booktabs/multirow/xcolor`，resizebox 时额外包含 `graphicx`）。
 - TODO：支持 `.xls` 输入（原版支持）。
-- TODO：header_rows 自动识别与可配置（原版支持）。
-- TODO：样式高保真（粗斜体/下划线/颜色/背景色/旋转/富文本 rich segments 等）从 Excel 读取并回转。
-- TODO：尾部空列裁剪逻辑与“宽标题合并单元格”裁剪兼容（原版有多条测试覆盖）。
+- 已实现：header_rows 自动识别与可配置（对齐原版语义：基于首行 rowspan 推导；也支持显式数字）。
+- 已实现（核心）：样式高保真从 Excel 读取并回转：粗/斜/下划线/颜色/背景色/旋转/富文本 rich segments（有 roundtrip 测试锁定）。
+- 已实现：尾部空列裁剪逻辑与“宽标题合并单元格”裁剪兼容（有测试覆盖）。
 - TODO：主题系统（Jinja2 themes / three_line 等）与参数（caption/label/position/font_size/col_spec 等）完整对齐。
 - TODO：生成的 LaTeX 结构与原版尽量一致（目前只做语义层面验证，排版差异较大）。
 
@@ -40,8 +40,8 @@
 - 已实现：目录输入时 `output` 必须为目录（传 `*.xlsx` 会报错）。
 - 已实现：单文件输入时 `output` 可为目录（输出为 `output/<inputStem>.xlsx`）。
 - 已实现：支持单列表格（仅 1 列时不要求行内出现 `&`）。
-- TODO：单个 `.tex` 内多表解析并写入多 sheet（原版支持）。
-- TODO：完整样式回写到 Excel（字体/颜色/背景色/旋转/富文本分段等）。
+- 部分已实现：单个 `.tex` 内多表解析（`readTexAll`）；TODO：写入多 sheet（原版支持）。
+- 已实现（核心）：样式回写到 Excel（粗/斜/下划线/颜色/背景色/旋转/富文本分段等；有测试覆盖）。
 - TODO：强健的 tex 容错解析（处理 docx/OCR 导致的异常反斜杠、转义分隔符、嵌套 tabular 等；原版有大量测试覆盖）。
 - TODO：`definecolor/newcommand` 宏展开与颜色模型解析（原版支持）。
 
@@ -51,7 +51,7 @@
 
 ### CLI / Config
 
-- TODO：未实现 CLI（原版 `pubtab xlsx2tex/tex2xlsx/preview/themes`）。
+- 已实现（最小可用）CLI：`pubtab xlsx2tex/tex2xlsx`（支持 `--sheet/--caption/--label/--position/--resizebox/--colSpec/--headerRows`）。
 - TODO：未实现 YAML config（原版支持 config + 显式参数覆盖）。
 
 ## API（当前）
@@ -60,6 +60,7 @@
 - `texToExcel(input, output)`
 - `render(table, options?)`
 - `readTex(tex)`
+- `readTexAll(tex)`
 
 ## 快速使用
 
@@ -97,7 +98,7 @@ npm run build
 - `test_tex_to_xlsx_dimensions / values_match / merged_cells`：从 `.tex` 生成 `.xlsx` 的维度、值、合并范围对齐。
 - `test_xlsx_to_tex_roundtrip`：`.xlsx -> .tex -> (parse) TableData` 的维度一致（以及更强的值一致回归）。
 - `test_preview_*` 与 `test_preview_download_*`：preview 管线与 TinyTeX/缺包安装相关（我们未实现 preview）。
-- `test_read_excel_trims_*`：Excel 读取裁剪逻辑（我们未实现裁剪）。
+- `test_read_excel_trims_*`：Excel 读取裁剪逻辑（我们已覆盖核心裁剪，但尚未逐条迁移所有原版测试）。
 - `test_tex_reader_*` 大量容错与语义解析用例（我们目前只做最小解析与保守剥壳）。
 - `test_render_*`：three_line 主题渲染细节、特殊字符、section row 规则、unicode 下标等（我们 renderer 尚未对齐）。
 - `test_load_config_*`：YAML config 行为（我们未实现）。
