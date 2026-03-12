@@ -36,6 +36,13 @@ describe('browser api', () => {
     expect(tex).toContain('Score');
   });
 
+  it('xlsxBufferToTex 在浏览器入口下仍会输出 theme package hints', async () => {
+    const buffer = await buildWorkbookBuffer();
+    const tex = await xlsxBufferToTex(buffer, { headerRows: 1, theme: 'three_line' });
+
+    expect(tex).toContain('% \\usepackage{booktabs}');
+  });
+
   it('xlsxToTableResult / xlsxToTex: 支持 ArrayBuffer 与 Blob 输入，并同时返回结构结果', async () => {
     const buffer = await buildWorkbookBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

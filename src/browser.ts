@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 
 import type { TableData, TableResult, Xlsx2TexOptions } from './models.js';
 import { readTex } from './texReader.js';
-import { render } from './renderer.js';
+import { render } from './renderer.browser.js';
 import { readWorkbook } from './core/table.js';
 import { workbookFromTable } from './core/workbook.js';
 import { tableToResult } from './core/view-model.js';

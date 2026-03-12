@@ -89,4 +89,18 @@ describe('xlsx2tex theme', () => {
       'pifont',
     ]);
   });
+
+  it('getTheme 返回值不会暴露内部缓存引用', () => {
+    const a = getTheme('three_line');
+    a.packages.push('bad');
+    a.spacing.heavyrulewidth = '9pt';
+
+    const b = getTheme('three_line');
+    expect(b.packages).not.toContain('bad');
+    expect(b.spacing.heavyrulewidth).toBe('1.0pt');
+  });
+
+  it('listThemes 仍然来自 themes 目录中的 YAML 配置', () => {
+    expect(listThemes()).toContain('three_line');
+  });
 });

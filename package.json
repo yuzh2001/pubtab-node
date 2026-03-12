@@ -8,6 +8,7 @@
     "test": "vitest run",
     "test:node": "vitest run --project node",
     "test:browser": "vitest run --project browser",
+    "themes:generate": "node scripts/generate-theme-presets.mjs",
     "build": "tsc -p tsconfig.json",
     "dev": "vitest",
     "playground": "pnpm --dir playground dev",
