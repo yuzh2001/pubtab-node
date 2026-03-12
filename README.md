@@ -4,70 +4,54 @@
 ![License ISC](https://img.shields.io/badge/license-ISC-1f4b99)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6)
 
-`pubtab-node` 是一个面向 Node.js / TypeScript 的表格转换工具，用来在 Excel 表格和 LaTeX `tabular` 之间做双向转换。
+[`pubtab`](https://github.com/Galaxy-Dawn/pubtab) is a feature-rich, well-tested tool for converting between LaTeX tables and Excel spreadsheets.
 
-适合把论文表格、报告表格或标注表格接入 Node.js 工作流，用 CLI 批处理，或者在代码里直接调用。
+`pubtab-node` is a TypeScript port of the original Python `pubtab`, providing two-way conversion between Excel workbooks and LaTeX `tabular`.
 
-当前版本优先提供一套可用、可测、可发布的核心能力：
+The Node version removes the preview feature from the Python version, while keeping most core capabilities:
 
 - `.xlsx -> .tex`
 - `.tex -> .xlsx`
-- 基础 CLI
-- 可编程 API
-- 已覆盖一批 round-trip 与兼容性测试
+- basic CLI
+- theme support
+- programmable API
 
-它的目标不是在第一版就完全复刻原版 `pubtab` 的全部行为，而是先把最常用、最稳定的转换链路落下来，再逐步补齐与原版的差距。
+## Installation
 
-## 适用场景
-
-- 需要把 `.xlsx` 批量转成 LaTeX 表格
-- 需要把已有的 LaTeX `tabular` 回写成 `.xlsx`
-- 需要在 Node.js 脚本或服务里嵌入转换能力
-- 希望通过配置文件或 CLI 参数稳定复现输出
-
-## 暂不适用
-
-- 依赖完整 preview 管线
-- 需要与 Python 原版在排版细节上完全一致
-- 需要处理大量异常、破损或高度定制的 TeX 输入
-- 需要 `.xls` 老格式支持
-
-## 安装
-
-### 全局安装 CLI
+### Install the CLI globally
 
 ```bash
-npm i -g pubtab-node
+pnpm add -g pubtab-node
 ```
 
-安装后可直接使用：
+After installation:
 
 ```bash
 pubtab-node --help
 ```
 
-### 作为库安装
+### Install as a library
 
 ```bash
-npm i pubtab-node
+pnpm add pubtab-node
 ```
 
-## CLI 使用
+## CLI Usage
 
-### Excel 转 LaTeX
+### Excel to LaTeX
 
 ```bash
 pubtab-node xlsx2tex table.xlsx out/table.tex
 ```
 
-按 sheet 导出：
+Export by sheet:
 
 ```bash
 pubtab-node xlsx2tex table.xlsx out/table.tex --sheet 0
 pubtab-node xlsx2tex table.xlsx out/table.tex --sheet Sheet1
 ```
 
-补充 caption / label / position：
+Add caption / label / position:
 
 ```bash
 pubtab-node xlsx2tex table.xlsx out/table.tex \
@@ -76,13 +60,13 @@ pubtab-node xlsx2tex table.xlsx out/table.tex \
   --position htbp
 ```
 
-### LaTeX 转 Excel
+### LaTeX to Excel
 
 ```bash
 pubtab-node tex2xlsx table.tex out/table.xlsx
 ```
 
-### 使用 YAML 配置
+### Use a YAML config file
 
 ```yaml
 sheet: 1
@@ -97,20 +81,36 @@ headerRows: auto
 pubtab-node xlsx2tex table.xlsx out/table.tex --config pubtab.yml
 ```
 
-命令行显式参数会覆盖配置文件中的同名项。
+Explicit CLI flags override fields with the same name in the config file.
 
-### CLI 帮助
+### CLI help
 
 ```bash
 pubtab-node --help
 ```
 
-当前支持的主命令：
+Currently supported top-level commands:
 
 - `pubtab-node xlsx2tex`
 - `pubtab-node tex2xlsx`
 
-## API 使用
+## API Usage
+
+It is recommended to wrap LaTeX strings with `String.raw` to avoid escape issues.
+
+```ts
+// Backslashes inside String.raw do not need to be escaped.
+const noNeedToUseEscapes = String.raw`\begin{something}`;
+const latexString = String.raw`
+    \begin{tabular}{cc}
+    A & B\\
+    \end{tabular}\
+`;
+
+// Not recommended: backslashes must be escaped manually.
+const latexStringNotRecommended =
+  '\\begin{tabular}{cc}A & B\\\\ \\end{tabular}';
+```
 
 ```ts
 import { xlsx2tex, texToExcel, readTex, render } from 'pubtab-node';
@@ -118,11 +118,11 @@ import { xlsx2tex, texToExcel, readTex, render } from 'pubtab-node';
 await xlsx2tex('table.xlsx', 'out/table.tex');
 await texToExcel('table.tex', 'out/table.xlsx');
 
-const table = readTex('\\begin{tabular}{cc}A & B\\\\\\end{tabular}');
+const table = readTex(String.raw`\begin{tabular}{cc}A & B\\ \end{tabular}`);
 const tex = render(table);
 ```
 
-当前导出的主要 API：
+Main exported APIs:
 
 - `xlsx2tex(input, output, options?)`
 - `texToExcel(input, output)`
@@ -130,79 +130,66 @@ const tex = render(table);
 - `readTex(tex)`
 - `readTexAll(tex)`
 
-## 当前能力
+## Current Capabilities
 
-### 已支持
+### Supported
 
-- 读取 `.xlsx` 并输出 `.tex`
-- 读取 `.tex` 并输出 `.xlsx`
-- 未指定 `sheet` 时导出全部工作表
-- 指定单个 sheet 导出
-- 目录输入批量转换
-- `output` 同时支持文件路径和目录路径
-- 合并单元格的基础语义保持
-- 自动或显式 `headerRows`
-- `caption`、`label`、`position`、`resizebox`、`colSpec`
-- 样式的核心 round-trip：粗体、斜体、下划线、文字颜色、背景色、旋转、富文本片段
+- read `.xlsx` and output `.tex`
+- read `.tex` and output `.xlsx`
+- export all worksheets when `sheet` is not specified
+- export a single sheet when requested
+- batch conversion for directory inputs
+- `output` supports both file paths and directory paths
+- preserve the basic semantics of merged cells
+- automatic or explicit `headerRows`
+- `caption`, `label`, `position`, `resizebox`, `colSpec`
+- core style round-trip for bold, italic, underline, text color, background color, rotation, and rich text runs
 
-### 当前不包含
+### Not included yet
 
-- preview 管线
-- `.xls` 输入
-- 原版完整主题系统与全部渲染细节
-- 更强的 TeX 容错解析
-- `definecolor` / `newcommand` 宏展开的完整支持
-- 单个 `.tex` 多表写入多 sheet
+- preview pipeline
+- `.xls` input
+- the full theme system and every rendering detail from the original project
+- stronger TeX fault tolerance
+- full support for expanding `definecolor` / `newcommand` macros
+- writing multiple tables from a single `.tex` file into multiple sheets
 
-## 与原版 pubtab 的差距
+## Gaps Compared with the Original `pubtab`
 
-这个项目是对 Python 原版 `pubtab` 的 TypeScript 复刻，但当前仍然是“核心可用”而不是“完全对齐”。
+This project is a TypeScript port of the original Python `pubtab`, but it is currently "core usable" rather than fully aligned.
 
-现阶段最主要的差距有：
+The main remaining gaps are:
 
-- 还没有 `preview` 能力
-- `.xls` 暂未支持
-- 主题系统和排版细节还没有完全对齐原版
-- 对异常 TeX 输入的容错能力仍在继续补齐
-- 部分原版测试场景还没有逐项迁移
+- no `preview` support yet
+- `.xls` is not supported yet
+- the theme system and layout details are not fully aligned with the original implementation
+- tolerance for malformed or unusual TeX input is still being improved
+- some original test scenarios have not been migrated one by one yet
 
-如果你的目标是：
+## Testing and Development
 
-- 在 Node.js 环境里完成 Excel / LaTeX 的基础双向转换
-- 通过 CLI 或 API 集成到自己的流程里
-- 依赖一套相对轻量、可测试、可扩展的实现
-
-那么当前版本已经适合使用。
-
-如果你的目标是：
-
-- 完整替代原版 `pubtab`
-- 依赖 preview、复杂主题、极强的 TeX 容错
-- 要求输出格式与原版几乎逐字符一致
-
-那么目前还不适合直接视为完全替代品。
-
-## 测试与开发
-
-开发环境：
+Development environment:
 
 ```bash
-npm i
-npm test
-npm run build
+git clone https://github.com/Galaxy-Dawn/pubtab .pubtab-python # local reference clone of the original Python project; not included in the npm package
+pnpm i
+pnpm test
+pnpm build
 ```
 
-当前仓库包含 fixtures、round-trip、CLI 配置与兼容性测试；发布包本身只包含 `dist`、`README.md` 和 `package.json`，不会带上测试目录。
+This repository is primarily managed with `pnpm`. Prefer `pnpm i`, `pnpm test`, and `pnpm build` for local development and release verification.
 
-## 仓库说明
+This repository includes fixtures, round-trip tests, CLI config tests, and compatibility tests. The published package itself only includes `dist`, `README.md`, and `package.json`, and does not ship the test directories.
 
-- 主要实现位于 `src/`
-- 测试位于 `tests/`
-- `tests/fixtures` 包含用于 round-trip 对比的样例
-- `./.pubtab-python` 是本地参考用的 Python 原版副本，不会进入 npm 发布包
+## Repository Notes
 
-## 致谢
+- main implementation: `src/`
+- tests: `tests/`
+- `tests/fixtures` contains samples used for round-trip comparisons
+- `./.pubtab-python` is a local reference clone of the original Python project and is not included in the npm package
 
-本项目的设计目标、行为对齐方向和部分测试迁移工作，都直接受益于 Python 原版 `pubtab`。
+## Acknowledgements
 
-感谢原版项目提供了清晰的问题域抽象、可参考的行为定义，以及大量有价值的测试样例，使 `pubtab-node` 能够在 TypeScript 生态里继续推进这条转换链路。
+The design goals, behavior-alignment direction, and part of the test migration work in this project all directly benefit from the original Python `pubtab`.
+
+Thanks to the original project for providing a clear abstraction of the problem domain, a useful behavioral reference, and many valuable test fixtures that make it possible to keep pushing this conversion workflow forward in the TypeScript ecosystem.

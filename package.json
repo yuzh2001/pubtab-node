@@ -1,13 +1,14 @@
 {
   "name": "pubtab-node",
   "version": "0.1.0",
-  "description": "TypeScript toolkit and CLI for converting tables between Excel and LaTeX.",
+  "description": "TypeScript toolkit and CLI for converting tables between Excel and LaTeX. Inspired by Python module pubtab.",
+  "packageManager": "pnpm@9.15.9",
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest run",
     "build": "tsc -p tsconfig.json",
     "dev": "vitest",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "pnpm test && pnpm build"
   },
   "keywords": [
     "latex",
