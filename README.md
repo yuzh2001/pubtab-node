@@ -13,7 +13,7 @@ The Node version removes the preview feature from the Python version, while keep
 - `.xlsx -> .tex`
 - `.tex -> .xlsx`
 - basic CLI
-- theme support
+- original `three_line` theme support
 - programmable API
 
 ## Installation
@@ -75,6 +75,9 @@ label: tab:example
 position: htbp
 theme: three_line
 headerRows: auto
+spacing:
+  tabcolsep: 2.4pt
+  arraystretch: 1.0
 ```
 
 ```bash
@@ -82,6 +85,14 @@ pubtab-node xlsx2tex table.xlsx out/table.tex --config pubtab.yml
 ```
 
 Explicit CLI flags override fields with the same name in the config file.
+
+The config loader accepts both camelCase and the original Python-style snake_case keys, for example:
+
+- `headerRows` / `header_rows`
+- `fontSize` / `font_size`
+- `colSpec` / `col_spec`
+- `headerSep` / `header_sep`
+- `spanColumns` / `span_columns`
 
 ### CLI help
 
@@ -136,6 +147,7 @@ Main exported APIs:
 
 - read `.xlsx` and output `.tex`
 - read `.tex` and output `.xlsx`
+- load the original `three_line` theme config from `themes/three_line/config.yaml`
 - export all worksheets when `sheet` is not specified
 - export a single sheet when requested
 - batch conversion for directory inputs
@@ -149,7 +161,7 @@ Main exported APIs:
 
 - preview pipeline
 - `.xls` input
-- the full theme system and every rendering detail from the original project
+- full parity for every original edge-case LaTeX layout behavior
 - stronger TeX fault tolerance
 - full support for expanding `definecolor` / `newcommand` macros
 - writing multiple tables from a single `.tex` file into multiple sheets
@@ -162,7 +174,7 @@ The main remaining gaps are:
 
 - no `preview` support yet
 - `.xls` is not supported yet
-- the theme system and layout details are not fully aligned with the original implementation
+- a few edge-case LaTeX layout behaviors are still being aligned with the original implementation
 - tolerance for malformed or unusual TeX input is still being improved
 - some original test scenarios have not been migrated one by one yet
 
@@ -179,11 +191,12 @@ pnpm build
 
 This repository is primarily managed with `pnpm`. Prefer `pnpm i`, `pnpm test`, and `pnpm build` for local development and release verification.
 
-This repository includes fixtures, round-trip tests, CLI config tests, and compatibility tests. The published package itself only includes `dist`, `README.md`, and `package.json`, and does not ship the test directories.
+This repository includes fixtures, round-trip tests, CLI config tests, and compatibility tests. The published package ships `dist/` and `themes/`, but does not ship the test directories.
 
 ## Repository Notes
 
 - main implementation: `src/`
+- runtime theme configs: `themes/`
 - tests: `tests/`
 - `tests/fixtures` contains samples used for round-trip comparisons
 - `./.pubtab-python` is a local reference clone of the original Python project and is not included in the npm package
