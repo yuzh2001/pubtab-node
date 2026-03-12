@@ -182,6 +182,32 @@ function trimTrailingEmptyColsLikePython(cells: Cell[][], numCols: number): numb
   return numCols;
 }
 
+function nextHeaderRowNeeded(cells: Cell[][], headerRows: number, numCols: number): boolean {
+  if (headerRows <= 0 || headerRows >= cells.length) return false;
+
+  for (let rowIndex = 0; rowIndex < headerRows; rowIndex += 1) {
+    const row = cells[rowIndex] ?? [];
+    for (let colIndex = 0; colIndex < numCols; colIndex += 1) {
+      const cell = row[colIndex];
+      if (!cell) continue;
+
+      const rowSpan = Math.max(1, cell.rowspan || 1);
+      const colSpan = Math.max(1, cell.colspan || 1);
+      const nextRowIndex = rowIndex + rowSpan;
+      if (colSpan <= 1 || nextRowIndex !== headerRows || nextRowIndex >= cells.length) continue;
+
+      for (let coveredCol = colIndex; coveredCol < Math.min(numCols, colIndex + colSpan); coveredCol += 1) {
+        const nextRowCell = cells[nextRowIndex]?.[coveredCol];
+        if (isCellPayload(nextRowCell)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 export function tableFromWorksheet(ws: ExcelJS.Worksheet, opts: Xlsx2TexOptions): TableData {
   const rowCount = Math.max(ws.rowCount || 0, ws.actualRowCount || 0);
   const colCount = Math.max(ws.columnCount || 0, ws.actualColumnCount || 0);
@@ -243,6 +269,17 @@ export function tableFromWorksheet(ws: ExcelJS.Worksheet, opts: Xlsx2TexOptions)
         headerRows = Math.max(headerRows, r + (cell.rowspan || 1));
       }
       r += 1;
+    }
+
+    while (nextHeaderRowNeeded(trimmedRows, headerRows, numCols)) {
+      headerRows += 1;
+      let scanRow = headerRows - 1;
+      while (scanRow < headerRows && scanRow < trimmedRows.length) {
+        for (const cell of trimmedRows[scanRow]) {
+          headerRows = Math.max(headerRows, scanRow + (cell.rowspan || 1));
+        }
+        scanRow += 1;
+      }
     }
   }
 

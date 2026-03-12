@@ -21,8 +21,8 @@ function run(command: string, args: string[], cwd: string): Promise<{ code: numb
 }
 
 describe('playground build', () => {
-  it('浏览器 playground 可以完成生产构建', async () => {
-    const repoRoot = path.resolve(import.meta.dirname, '..');
+  it('playground 可以完成生产构建', async () => {
+    const repoRoot = path.resolve(import.meta.dirname, '..', '..');
     const result = await run('pnpm', ['build:playground'], repoRoot);
 
     expect(result.code, result.stderr).toBe(0);

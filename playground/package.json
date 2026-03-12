@@ -7,8 +7,12 @@
     "build": "vite build --config vite.config.ts"
   },
   "dependencies": {
+    "@nuxt/ui": "latest",
+    "@tailwindcss/vite": "latest",
     "@tanstack/vue-table": "^8.21.3",
-    "vue": "^3.5.30"
+    "tailwindcss": "latest",
+    "vue": "^3.5.30",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.4",

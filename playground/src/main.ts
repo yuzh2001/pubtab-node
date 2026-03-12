@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 
-import App from './App.js';
+import App from './App.vue';
 import './style.css';
 
 export function mountApp(container: Element | string = '#app') {
@@ -8,7 +8,9 @@ export function mountApp(container: Element | string = '#app') {
   if (!target) {
     throw new Error(`Mount target not found: ${String(container)}`);
   }
-  return createApp(App).mount(target);
+
+  const app = createApp(App);
+  return app.mount(target);
 }
 
 if (typeof document !== 'undefined') {

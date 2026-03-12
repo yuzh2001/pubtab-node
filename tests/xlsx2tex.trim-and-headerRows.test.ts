@@ -86,4 +86,53 @@ describe('xlsx2tex: trims + headerRows', () => {
     const rowLinesBefore = lines.slice(0, midIdx).filter((l) => l.endsWith('\\\\'));
     expect(rowLinesBefore.length).toBe(1);
   });
+
+  it('headerRows=auto：第一行有横向分组标题时，第二行子标题也应算 header', async () => {
+    const dir = await mkTmpDir('pubtab-ts-grouped-header-');
+    const xlsxPath = path.join(dir, 'grouped.xlsx');
+    const outTex = path.join(dir, 'grouped.tex');
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('S1');
+
+    ws.getCell('A1').value = 'Backbones';
+    ws.getCell('B1').value = 'Methods';
+    ws.getCell('C1').value = 'Rubric Grading';
+    ws.getCell('G1').value = 'Verifiability';
+    ws.getCell('I1').value = 'ROUGE-1';
+
+    ws.mergeCells('A1:A2');
+    ws.mergeCells('B1:B2');
+    ws.mergeCells('C1:F1');
+    ws.mergeCells('G1:H1');
+    ws.mergeCells('I1:I2');
+
+    ws.getCell('C2').value = 'Relevance';
+    ws.getCell('D2').value = 'Breadth';
+    ws.getCell('E2').value = 'Interest Level';
+    ws.getCell('F2').value = 'Organization';
+    ws.getCell('G2').value = 'CR';
+    ws.getCell('H2').value = 'CP';
+
+    ws.getCell('A3').value = 'Qwen-2.5';
+    ws.mergeCells('A3:A7');
+    ws.getCell('B3').value = 'oRAG';
+    ws.getCell('C3').value = '3.91';
+    ws.getCell('D3').value = '4.08';
+    ws.getCell('E3').value = '3.96';
+    ws.getCell('F3').value = '3.63';
+    ws.getCell('G3').value = '00.00';
+    ws.getCell('H3').value = '00.00';
+    ws.getCell('I3').value = '00.00';
+
+    await wb.xlsx.writeFile(xlsxPath);
+
+    const tex = await xlsx2tex(xlsxPath, outTex, { headerRows: 'auto' });
+
+    const lines = tex.split('\n').map((l) => l.trim());
+    const midIdx = lines.indexOf('\\midrule');
+    expect(midIdx).toBeGreaterThanOrEqual(0);
+    const rowLinesBefore = lines.slice(0, midIdx).filter((l) => l.endsWith('\\\\'));
+    expect(rowLinesBefore.length).toBe(2);
+  });
 });

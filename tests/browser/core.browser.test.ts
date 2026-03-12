@@ -43,7 +43,7 @@ describe('core browser-safe helpers', () => {
     expect((outSheet.model as { merges?: string[] }).merges).toContain('A1:B1');
   });
 
-  it('tableToResult: 产出适合前端消费的结构结果', () => {
+  it('tableToResult: 产出 TanStack 列和无 placeholder 的渲染行', () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Sheet1');
 
@@ -59,12 +59,13 @@ describe('core browser-safe helpers', () => {
     const result = tableToResult(table);
 
     expect(result.columns).toHaveLength(2);
+    expect(result.leafColumnIds).toHaveLength(2);
+    expect(result.data).toHaveLength(1);
     expect(result.headerRows).toHaveLength(2);
     expect(result.bodyRows).toHaveLength(1);
-    expect(result.rows[0].cells[0].rowspan).toBe(2);
-    expect(result.rows[1].cells[0].isPlaceholder).toBe(true);
-    expect(result.rows[1].cells[0].originRowIndex).toBe(0);
-    expect(result.spans).toEqual([{ row: 0, col: 0, rowspan: 2, colspan: 1 }]);
-    expect(result.table.headerRows).toBe(2);
+    expect(result.headerRows[0]?.cells[0]?.rowSpan).toBe(2);
+    expect(result.headerRows[0]?.cells[0]?.originRowIndex).toBe(0);
+    expect(result.bodyRows[0]?.cells[0]?.text).toBe('South');
+    expect(result.bodyRows[0]?.cells[1]?.text).toBe('18');
   });
 });

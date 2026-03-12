@@ -16,7 +16,7 @@ describe('browser fixture: xlsx -> tex', () => {
     expect(parsed.numRows).toBeGreaterThan(0);
     expect(parsed.numCols).toBeGreaterThan(0);
     expect(table.columns.length).toBe(parsed.numCols);
-    expect(table.rows.length).toBe(parsed.numRows);
-    expect(table.spans.length).toBeGreaterThanOrEqual(0);
+    expect(table.leafColumnIds.length).toBe(parsed.numCols);
+    expect(table.data.length).toBe(parsed.numRows - parsed.headerRows);
   });
 });

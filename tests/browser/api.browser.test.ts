@@ -52,7 +52,7 @@ describe('browser api', () => {
 
     expect(result.columns).toHaveLength(2);
     expect(result.bodyRows[0].cells[0].text).toBe('Alice');
-    expect(combined.table.columns[1].label).toBe('C2');
+    expect(combined.table.columns[1].header).toBe('Score');
     expect(combined.tex).toContain('Alice');
   });
 
@@ -76,7 +76,7 @@ Alice & 9 \\
     expect(combined.filename).toBe('scores.xlsx');
     expect(combined.mimeType).toContain('spreadsheetml');
     expect(combined.blob.type).toContain('spreadsheetml');
-    expect(tableResult.rows[1].cells[0].text).toBe('Alice');
+    expect(tableResult.bodyRows[0].cells[0].text).toBe('Alice');
     expect(ws.getCell('A2').value).toBe('Alice');
     expect(ws.getCell('B2').value).toBe(9);
   });

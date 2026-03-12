@@ -50,14 +50,14 @@ export interface TableColumnView {
   label: string;
 }
 
-export interface TableSpanView {
-  row: number;
-  col: number;
-  rowspan: number;
-  colspan: number;
+export interface TableColumnSchema {
+  id: string;
+  accessorKey: string;
+  header: string;
+  index: number;
 }
 
-export interface TableCellView {
+export interface TableRenderCell {
   id: string;
   rowIndex: number;
   colIndex: number;
@@ -66,32 +66,39 @@ export interface TableCellView {
   text: string;
   style: CellStyle;
   richSegments: RichSegment[] | null;
-  rowspan: number;
-  colspan: number;
+  rowSpan: number;
+  colSpan: number;
   originRowIndex: number;
   originColIndex: number;
-  isPlaceholder: boolean;
   section: 'header' | 'body';
 }
 
-export interface TableRowView {
+export interface TableRenderRow {
   id: string;
   index: number;
   section: 'header' | 'body';
-  cells: TableCellView[];
+  cells: TableRenderCell[];
   values: unknown[];
 }
 
+export interface TableDataRow {
+  id: string;
+  rowIndex: number;
+  values: Record<string, unknown>;
+  cells: TableRenderCell[];
+}
+
 export interface TableViewModel {
-  columns: TableColumnView[];
-  rows: TableRowView[];
-  headerRows: TableRowView[];
-  bodyRows: TableRowView[];
-  grid: TableCellView[][];
-  spans: TableSpanView[];
+  columns: TableColumnSchema[];
+  leafColumnIds: string[];
+  data: TableDataRow[];
+  headerRows: TableRenderRow[];
+  bodyRows: TableRenderRow[];
+  headerDepth: number;
   size: {
     rows: number;
     cols: number;
+    bodyRows: number;
   };
 }
 

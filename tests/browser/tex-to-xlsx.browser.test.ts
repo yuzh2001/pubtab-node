@@ -19,7 +19,7 @@ describe('browser fixture: tex -> xlsx', () => {
     expect(combined.filename).toBe('table4.xlsx');
     expect(combined.blob.size).toBeGreaterThan(0);
     expect(table.columns.length).toBeGreaterThan(0);
-    expect(table.rows.length).toBeGreaterThan(0);
+    expect(table.bodyRows.length).toBeGreaterThan(0);
     expect(ws.rowCount).toBeGreaterThan(0);
     expect(ws.columnCount).toBeGreaterThan(0);
   });

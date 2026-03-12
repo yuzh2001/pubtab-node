@@ -10,3 +10,7 @@ dist-playground/
 .tmp
 tests/browser/__screenshots__/
 playground-after-*.yaml
+auto-imports.d.ts
+components.d.ts
+playground/auto-imports.d.ts
+playground/components.d.ts
