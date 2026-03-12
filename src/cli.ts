@@ -51,12 +51,12 @@ function parseArgs(args: string[]): ParsedArgs {
 function usage(): string {
   return [
     '用法:',
-    '  pubtab xlsx2tex <input> <output> [--config <yaml>] [--sheet <nameOrIndex>] [--theme <name>] [--caption <text>] [--label <text>] [--position <pos>] [--resizebox <spec>] [--colSpec <spec>] [--headerRows <n>]',
-    '  pubtab tex2xlsx <input> <output>',
+    '  pubtab-node xlsx2tex <input> <output> [--config <yaml>] [--sheet <nameOrIndex>] [--theme <name>] [--caption <text>] [--label <text>] [--position <pos>] [--resizebox <spec>] [--colSpec <spec>] [--headerRows <n>]',
+    '  pubtab-node tex2xlsx <input> <output>',
     '',
     '示例:',
-    '  pubtab xlsx2tex table.xlsx out/table.tex --sheet 0 --caption "My Table" --label tab:my --position htbp',
-    '  pubtab tex2xlsx table.tex out/table.xlsx',
+    '  pubtab-node xlsx2tex table.xlsx out/table.tex --sheet 0 --caption "My Table" --label tab:my --position htbp',
+    '  pubtab-node tex2xlsx table.tex out/table.xlsx',
   ].join('\n');
 }
 
@@ -194,13 +194,13 @@ export async function runCli(argv: string[], cwd: string = process.cwd()): Promi
   const cmd = args[0];
   if (!cmd || cmd === '--help' || cmd === '-h') {
     console.log(usage());
-    return 1;
+    return cmd ? 0 : 1;
   }
 
   const { positionals, opts, help, unknown } = parseArgs(args.slice(1));
   if (help) {
     console.log(usage());
-    return 1;
+    return 0;
   }
   if (unknown.length > 0) {
     console.log(`未知参数: ${unknown.join(' ')}`);

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -10,7 +10,11 @@ async function mkTmpDir(prefix: string): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
-describe('pubtab-ts cli', () => {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('pubtab-node cli', () => {
   it('runCli: xlsx2tex 能生成 tex 文件', async () => {
     const dir = await mkTmpDir('pubtab-ts-cli-');
     const xlsxPath = path.join(dir, 'one.xlsx');
@@ -20,7 +24,7 @@ describe('pubtab-ts cli', () => {
     wb.addWorksheet('S1').getCell('A1').value = 'ONLY';
     await wb.xlsx.writeFile(xlsxPath);
 
-    const code = await runCli(['node', 'pubtab', 'xlsx2tex', xlsxPath, outTex], dir);
+    const code = await runCli(['node', 'pubtab-node', 'xlsx2tex', xlsxPath, outTex], dir);
     expect(code).toBe(0);
 
     const tex = await fs.readFile(outTex, 'utf8');
@@ -29,8 +33,19 @@ describe('pubtab-ts cli', () => {
 
   it('runCli: 参数错误时返回非 0', async () => {
     const dir = await mkTmpDir('pubtab-ts-cli-');
-    const code = await runCli(['node', 'pubtab', 'xlsx2tex'], dir);
+    const code = await runCli(['node', 'pubtab-node', 'xlsx2tex'], dir);
     expect(code).not.toBe(0);
   });
-});
 
+  it('runCli: --help 返回 0 且帮助文案使用 pubtab-node', async () => {
+    const dir = await mkTmpDir('pubtab-ts-cli-');
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const code = await runCli(['node', 'pubtab-node', '--help'], dir);
+
+    expect(code).toBe(0);
+    expect(log).toHaveBeenCalled();
+    expect(log.mock.calls[0]?.[0]).toContain('pubtab-node xlsx2tex');
+    expect(log.mock.calls[0]?.[0]).not.toContain('pubtab xlsx2tex');
+  });
+});

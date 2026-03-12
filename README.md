@@ -1,60 +1,128 @@
-# pubtab-ts
+# pubtab-node
 
-`pubtab` 的 TypeScript 复刻版（当前为“核心可用”实现），目标是逐步对齐 Python 原版（参考 `./.pubtab-python`）。
+![Node >=18](https://img.shields.io/badge/node-%3E%3D18-2f6f3e)
+![License ISC](https://img.shields.io/badge/license-ISC-1f4b99)
+![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6)
 
-## 范围与非目标
+`pubtab-node` 是一个面向 Node.js / TypeScript 的表格转换工具，用来在 Excel 表格和 LaTeX `tabular` 之间做双向转换。
 
-- 本仓库当前优先保证：基础双向转换管线可跑、输出文件命名规则稳定、能够用测试锁定行为。
-- 非目标（当前阶段）：完全对齐原版的排版细节、主题系统、preview 管线、复杂 tex 容错解析与富样式回转。
+适合把论文表格、报告表格或标注表格接入 Node.js 工作流，用 CLI 批处理，或者在代码里直接调用。
 
-## 功能对照（相对 Python 原版）
+当前版本优先提供一套可用、可测、可发布的核心能力：
 
-说明：用 `TODO` 标记尚未实现或未对齐的点。
+- `.xlsx -> .tex`
+- `.tex -> .xlsx`
+- 基础 CLI
+- 可编程 API
+- 已覆盖一批 round-trip 与兼容性测试
 
-### Excel -> LaTeX（xlsx2tex）
+它的目标不是在第一版就完全复刻原版 `pubtab` 的全部行为，而是先把最常用、最稳定的转换链路落下来，再逐步补齐与原版的差距。
 
-- 已实现：读取 `.xlsx`（基于 `exceljs`）并输出 `.tex`。
-- 已实现：未指定 `sheet` 时默认导出全部工作表为 `*_sheetNN.tex`。
-- 已实现：指定 `sheet`（名称或索引）时只导出单个 `.tex`。
-- 已实现：目录输入批量转换（目录内 `.xlsx` -> 输出目录内 `.tex`）。
-- 已实现：`output` 既可以是文件路径（`.tex`），也可以是目录：
-  - 单文件输入：若 `output` 不是 `.tex`，则视为目录并输出为 `output/<inputStem>.tex`。
-  - 多 sheet 导出：若 `output` 是目录则输出为 `output/<inputStem>_sheetNN.tex`；若 `output` 是 `.tex` 文件则输出为 `<outputDir>/<outputStem>_sheetNN.tex`。
-- 已实现：目录输入时 `output` 必须为目录（传 `*.tex` 会报错）。
-- 已实现：合并单元格“非 master 置空”的语义（避免重复值）。
-- 已实现：输出头部包含注释版 package hints（`booktabs/multirow/xcolor`，resizebox 时额外包含 `graphicx`）。
-- TODO：支持 `.xls` 输入（原版支持）。
-- 已实现：header_rows 自动识别与可配置（对齐原版语义：基于首行 rowspan 推导；也支持显式数字）。
-- 已实现（核心）：样式高保真从 Excel 读取并回转：粗/斜/下划线/颜色/背景色/旋转/富文本 rich segments（有 roundtrip 测试锁定）。
-- 已实现：尾部空列裁剪逻辑与“宽标题合并单元格”裁剪兼容（有测试覆盖）。
-- TODO：主题系统（Jinja2 themes / three_line 等）与参数（caption/label/position/font_size/col_spec 等）完整对齐。
-- TODO：生成的 LaTeX 结构与原版尽量一致（目前只做语义层面验证，排版差异较大）。
+## 适用场景
 
-### LaTeX -> Excel（texToExcel / readTex）
+- 需要把 `.xlsx` 批量转成 LaTeX 表格
+- 需要把已有的 LaTeX `tabular` 回写成 `.xlsx`
+- 需要在 Node.js 脚本或服务里嵌入转换能力
+- 希望通过配置文件或 CLI 参数稳定复现输出
 
-- 已实现：解析基本 `tabular`（忽略 `toprule/midrule/bottomrule/hline`）。
-- 已实现：基础拆行列（`\\` / `&`），支持 `multicolumn/multirow` 的最小展开。
-- 已实现：解包常见包装器（`textbf/textit/underline/textcolor/cellcolor/makecell/diagbox` 的保守剥壳），用于提取值。
-- 已实现：写出 `.xlsx`（基于 `exceljs`）。
-- 已实现：目录输入批量转换（目录内 `.tex` -> 输出目录内 `.xlsx`）。
-- 已实现：目录输入时 `output` 必须为目录（传 `*.xlsx` 会报错）。
-- 已实现：单文件输入时 `output` 可为目录（输出为 `output/<inputStem>.xlsx`）。
-- 已实现：支持单列表格（仅 1 列时不要求行内出现 `&`）。
-- 部分已实现：单个 `.tex` 内多表解析（`readTexAll`）；TODO：写入多 sheet（原版支持）。
-- 已实现（核心）：样式回写到 Excel（粗/斜/下划线/颜色/背景色/旋转/富文本分段等；有测试覆盖）。
-- TODO：强健的 tex 容错解析（处理 docx/OCR 导致的异常反斜杠、转义分隔符、嵌套 tabular 等；原版有大量测试覆盖）。
-- TODO：`definecolor/newcommand` 宏展开与颜色模型解析（原版支持）。
+## 暂不适用
 
-### Preview（tex -> PNG/PDF）
+- 依赖完整 preview 管线
+- 需要与 Python 原版在排版细节上完全一致
+- 需要处理大量异常、破损或高度定制的 TeX 输入
+- 需要 `.xls` 老格式支持
 
-- TODO：未实现（原版有 `pubtab preview`，包含 TinyTeX 自举、缺包自动安装、批量输出等）。
+## 安装
 
-### CLI / Config
+### 全局安装 CLI
 
-- 已实现（最小可用）CLI：`pubtab xlsx2tex/tex2xlsx`（支持 `--sheet/--caption/--label/--position/--resizebox/--colSpec/--headerRows`）。
-- 已实现：`pubtab xlsx2tex` 的 `--config`（YAML）及命令行显式参数覆盖。
+```bash
+npm i -g pubtab-node
+```
 
-## API（当前）
+安装后可直接使用：
+
+```bash
+pubtab-node --help
+```
+
+### 作为库安装
+
+```bash
+npm i pubtab-node
+```
+
+## CLI 使用
+
+### Excel 转 LaTeX
+
+```bash
+pubtab-node xlsx2tex table.xlsx out/table.tex
+```
+
+按 sheet 导出：
+
+```bash
+pubtab-node xlsx2tex table.xlsx out/table.tex --sheet 0
+pubtab-node xlsx2tex table.xlsx out/table.tex --sheet Sheet1
+```
+
+补充 caption / label / position：
+
+```bash
+pubtab-node xlsx2tex table.xlsx out/table.tex \
+  --caption "My Table" \
+  --label "tab:my_table" \
+  --position htbp
+```
+
+### LaTeX 转 Excel
+
+```bash
+pubtab-node tex2xlsx table.tex out/table.xlsx
+```
+
+### 使用 YAML 配置
+
+```yaml
+sheet: 1
+caption: Example Table
+label: tab:example
+position: htbp
+theme: three_line
+headerRows: auto
+```
+
+```bash
+pubtab-node xlsx2tex table.xlsx out/table.tex --config pubtab.yml
+```
+
+命令行显式参数会覆盖配置文件中的同名项。
+
+### CLI 帮助
+
+```bash
+pubtab-node --help
+```
+
+当前支持的主命令：
+
+- `pubtab-node xlsx2tex`
+- `pubtab-node tex2xlsx`
+
+## API 使用
+
+```ts
+import { xlsx2tex, texToExcel, readTex, render } from 'pubtab-node';
+
+await xlsx2tex('table.xlsx', 'out/table.tex');
+await texToExcel('table.tex', 'out/table.xlsx');
+
+const table = readTex('\\begin{tabular}{cc}A & B\\\\\\end{tabular}');
+const tex = render(table);
+```
+
+当前导出的主要 API：
 
 - `xlsx2tex(input, output, options?)`
 - `texToExcel(input, output)`
@@ -62,16 +130,61 @@
 - `readTex(tex)`
 - `readTexAll(tex)`
 
-## 快速使用
+## 当前能力
 
-```ts
-import { xlsx2tex, texToExcel } from 'pubtab-ts';
+### 已支持
 
-await xlsx2tex('table.xlsx', 'out/table.tex');
-await texToExcel('table.tex', 'out/table.xlsx');
-```
+- 读取 `.xlsx` 并输出 `.tex`
+- 读取 `.tex` 并输出 `.xlsx`
+- 未指定 `sheet` 时导出全部工作表
+- 指定单个 sheet 导出
+- 目录输入批量转换
+- `output` 同时支持文件路径和目录路径
+- 合并单元格的基础语义保持
+- 自动或显式 `headerRows`
+- `caption`、`label`、`position`、`resizebox`、`colSpec`
+- 样式的核心 round-trip：粗体、斜体、下划线、文字颜色、背景色、旋转、富文本片段
 
-## 开发
+### 当前不包含
+
+- preview 管线
+- `.xls` 输入
+- 原版完整主题系统与全部渲染细节
+- 更强的 TeX 容错解析
+- `definecolor` / `newcommand` 宏展开的完整支持
+- 单个 `.tex` 多表写入多 sheet
+
+## 与原版 pubtab 的差距
+
+这个项目是对 Python 原版 `pubtab` 的 TypeScript 复刻，但当前仍然是“核心可用”而不是“完全对齐”。
+
+现阶段最主要的差距有：
+
+- 还没有 `preview` 能力
+- `.xls` 暂未支持
+- 主题系统和排版细节还没有完全对齐原版
+- 对异常 TeX 输入的容错能力仍在继续补齐
+- 部分原版测试场景还没有逐项迁移
+
+如果你的目标是：
+
+- 在 Node.js 环境里完成 Excel / LaTeX 的基础双向转换
+- 通过 CLI 或 API 集成到自己的流程里
+- 依赖一套相对轻量、可测试、可扩展的实现
+
+那么当前版本已经适合使用。
+
+如果你的目标是：
+
+- 完整替代原版 `pubtab`
+- 依赖 preview、复杂主题、极强的 TeX 容错
+- 要求输出格式与原版几乎逐字符一致
+
+那么目前还不适合直接视为完全替代品。
+
+## 测试与开发
+
+开发环境：
 
 ```bash
 npm i
@@ -79,33 +192,17 @@ npm test
 npm run build
 ```
 
-## 测试覆盖（对照原版 pytest）
+当前仓库包含 fixtures、round-trip、CLI 配置与兼容性测试；发布包本身只包含 `dist`、`README.md` 和 `package.json`，不会带上测试目录。
 
-说明：下面的“原版测试名”来自 `./.pubtab-python/tests`，用于跟踪我们还缺哪些行为锁定。
+## 仓库说明
 
-### 已实现（本仓库 vitest）
+- 主要实现位于 `src/`
+- 测试位于 `tests/`
+- `tests/fixtures` 包含用于 round-trip 对比的样例
+- `./.pubtab-python` 是本地参考用的 Python 原版副本，不会进入 npm 发布包
 
-- `xlsx2tex_default_exports_all_sheets`：默认导出全部 sheet（`tests/pubtab.test.ts`）。
-- `xlsx2tex_sheet_option_exports_single_sheet`：指定 `sheet` 只导出一个（`tests/pubtab.test.ts`）。
-- `xlsx2tex_includes_commented_package_hints`：输出包含 package hints（`tests/pubtab.test.ts`）。
-- `xlsx2tex_package_hints_include_graphicx_when_resizebox_enabled`：resizebox 时包含 `graphicx` hint（`tests/pubtab.test.ts`）。
-- `tex2xlsx_directory_input_exports_all_tex_files`：目录批量 `.tex` -> `.xlsx`（`tests/pubtab.test.ts`）。
-- `test_tex_to_xlsx_dimensions / values_match / merged_cells`：基于 fixtures 的 `.tex -> .xlsx` 维度、值、合并范围对齐（`tests/fixtures.tex2xlsx.test.ts`，fixtures 在 `tests/fixtures`）。
-- `test_xlsx_to_tex_roundtrip`：基于 fixtures 的 `.xlsx -> .tex -> (parse) TableData` 维度一致（`tests/fixtures.xlsx2tex-roundtrip.test.ts`）。
-- 额外：fixture 语义对比（`.tmp/table1.xlsx` vs pubtab 输出 `.tmp/tex1_sheet01/02.tex`；缺文件自动跳过）。
-- `readTex <-> render` 最小往返结构测试（`tests/pubtab.test.ts`）。
+## 致谢
 
-### TODO（原版存在但本仓库尚未覆盖）
+本项目的设计目标、行为对齐方向和部分测试迁移工作，都直接受益于 Python 原版 `pubtab`。
 
-- `test_preview_*` 与 `test_preview_download_*`：preview 管线与 TinyTeX/缺包安装相关（我们未实现 preview）。
-- `test_read_excel_trims_*`：Excel 读取裁剪逻辑（我们已覆盖核心裁剪，但尚未逐条迁移所有原版测试）。
-- `test_tex_reader_*` 大量容错与语义解析用例（我们目前只做最小解析与保守剥壳）。
-- `test_render_*`：three_line 主题渲染细节、特殊字符、section row 规则、unicode 下标等（我们 renderer 尚未对齐）。
-- `test_load_config_*`：YAML config 行为（已迁移 `--config` 与覆盖语义，待补充更多原版边界用例）。
-
-## 目录与参考
-
-- Fixtures（已提交到仓库）：`tests/fixtures`（来源于 Python 原版 `./.pubtab-python/tests/fixtures`，用于 round-trip ground truth 测试）。
-- Python 原版参考：`./.pubtab-python`（该目录在 `.gitignore` 里；只有在你想更新 fixtures、对照更多 pytest 用例或比对实现细节时才需要 clone）。
-- 本仓库测试：`tests/pubtab.test.ts`
-- 主要实现：`src/excel.ts`, `src/texReader.ts`, `src/renderer.ts`
+感谢原版项目提供了清晰的问题域抽象、可参考的行为定义，以及大量有价值的测试样例，使 `pubtab-node` 能够在 TypeScript 生态里继续推进这条转换链路。
