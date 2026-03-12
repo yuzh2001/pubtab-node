@@ -4,9 +4,13 @@
 ![License ISC](https://img.shields.io/badge/license-ISC-1f4b99)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6)
 
+[中文说明](./README_zh.md)
+
 [`pubtab`](https://github.com/Galaxy-Dawn/pubtab) is a feature-rich, well-tested tool for converting between LaTeX tables and Excel spreadsheets.
 
 `pubtab-js` is a TypeScript port of the original Python `pubtab`, providing two-way conversion between Excel workbooks and LaTeX `tabular`.
+
+About 99% of the code in this repository was written by GPT-5.4, but the project is not maintained on trust alone: it also includes a very complete set of fixtures, round-trip tests, CLI/config tests, and browser/Node coverage to keep behavior checkable.
 
 The current package is being shaped as a dual-runtime package:
 

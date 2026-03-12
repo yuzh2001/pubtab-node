@@ -4,9 +4,13 @@
 ![License ISC](https://img.shields.io/badge/license-ISC-1f4b99)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6)
 
+[English](./README.md)
+
 `pubtab` https://github.com/Galaxy-Dawn/pubtab 是一个功能丰富、测试完整的LaTeX表格与excel双向转换工具。
 
 `pubtab-js` 是 Python 原版 `pubtab` 的 TypeScript 复刻，用来在 Excel 表格和 LaTeX `tabular` 之间做双向转换。
+
+这个仓库里约 99% 的代码由 GPT-5.4 写成，但项目并不是“靠感觉可用”：仓库里同时保留了非常完整的 fixtures、round-trip 测试、CLI/配置测试，以及浏览器和 Node 两侧的测试覆盖，用来持续校验行为。
 
 这个包正在朝双端包演进：
 
