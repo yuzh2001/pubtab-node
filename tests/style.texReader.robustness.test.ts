@@ -226,7 +226,7 @@ OpenOcc & C\\&L & 70.59 \\
     const table = readTex(tex);
     expect(table.numRows).toBe(2);
     expect(table.cells[1][1].value).toBe('C&L');
-    expect(table.cells[1][2].value).toBe(70.59);
+    expect(table.cells[1][2].value).toBe('70.59');
   });
 
   it('仅包含转义分隔符的行应该仍能拆出多个列', () => {

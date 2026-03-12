@@ -39,7 +39,7 @@ function cellValueToComparable(v: unknown): { kind: 'num'; num: number } | { kin
   if (!s) return { kind: 'str', str: '' };
 
   // Mirror Python's `float(s)` attempt (be conservative about what counts as numeric).
-  if (/^-?\d+(\.\d+)?([eE]-?\d+)?$/u.test(s)) {
+  if (/^[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?$/u.test(s)) {
     const n = Number(s);
     if (Number.isFinite(n)) return { kind: 'num', num: n };
   }
@@ -133,4 +133,3 @@ describe('fixtures: tex -> xlsx（迁移 pubtab-python test_tex_to_xlsx_*）', (
     expect(mergeCount(wsGen)).toBe(mergeCount(wsOrig));
   });
 });
-

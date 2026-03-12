@@ -3,28 +3,28 @@ import { hexToLatexColor, latexEscape } from './utils.js';
 import { getTheme } from './themes.js';
 
 const SUBSCRIPT_CHAR_MAP: Record<string, string> = {
-  'α': '\\\\alpha',
-  'β': '\\\\beta',
-  'γ': '\\\\gamma',
-  'δ': '\\\\delta',
-  'ε': '\\\\epsilon',
-  'θ': '\\\\theta',
-  'λ': '\\\\lambda',
-  'μ': '\\\\mu',
-  'π': '\\\\pi',
-  'σ': '\\\\sigma',
-  'φ': '\\\\phi',
-  'ω': '\\\\omega',
-  'Γ': '\\\\Gamma',
-  'Δ': '\\\\Delta',
-  'Θ': '\\\\Theta',
-  'Ω': '\\\\Omega',
+  'α': '\\alpha',
+  'β': '\\beta',
+  'γ': '\\gamma',
+  'δ': '\\delta',
+  'ε': '\\epsilon',
+  'θ': '\\theta',
+  'λ': '\\lambda',
+  'μ': '\\mu',
+  'π': '\\pi',
+  'σ': '\\sigma',
+  'φ': '\\phi',
+  'ω': '\\omega',
+  'Γ': '\\Gamma',
+  'Δ': '\\Delta',
+  'Θ': '\\Theta',
+  'Ω': '\\Omega',
 };
 
 function normalizeUnicodeSubscript(text: string): string {
-  return text.replace(/_([^\s\\{])/gu, (_m, ch) => {
+  return text.replace(/\\_([^\s\\{])/gu, (_m, ch) => {
     const escaped = SUBSCRIPT_CHAR_MAP[ch] ?? ch;
-    return `$_{${escaped}}`;
+    return `$_{${escaped}}$`;
   });
 }
 

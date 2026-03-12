@@ -144,12 +144,12 @@ describe('migrated python: round-trip tests', () => {
       const out = path.join(dir, 'multi.tex');
       await xlsx2tex(xlsxPath, out);
 
-      const generated = (await fs.readdir(dir)).filter((f) => f.startsWith('multi_sheet') && f.endsWith('.tex')).sort();
+      const generated = (await fs.readdir(dir)).filter((f) => f.startsWith('multi') && f.endsWith('.tex')).sort();
       expect(generated).toHaveLength(2);
-      expect(generated[0]).toBe('multi_sheet01.tex');
-      expect(generated[1]).toBe('multi_sheet02.tex');
-      const first = await fs.readFile(path.join(dir, generated[0]), 'utf8');
-      const second = await fs.readFile(path.join(dir, generated[1]), 'utf8');
+      expect(generated).toContain('multi_sheet01.tex');
+      expect(generated).toContain('multi_sheet02.tex');
+      const first = await fs.readFile(path.join(dir, 'multi_sheet01.tex'), 'utf8');
+      const second = await fs.readFile(path.join(dir, 'multi_sheet02.tex'), 'utf8');
       expect(first).toContain('MAINCELL');
       expect(second).toContain('AUXCELL');
     });
@@ -520,11 +520,11 @@ Method & Input & Score \\
 OpenOcc & C\\&L & 70.59 \\
 \bottomrule
 \end{tabular}
-`;
+      `;
       const table = readTex(tex);
       expect(table.numRows).toBe(2);
       expect(table.cells[1][1].value).toBe('C&L');
-      expect(table.cells[1][2].value).toBe(70.59);
+      expect(table.cells[1][2].value).toBe('70.59');
     });
 
     it('test_tex_reader_all_delimiters_escaped_as_ampersand_are_recovered', () => {
@@ -552,10 +552,10 @@ M & NQ & ARC-C \\
 \multirow{2}{*}{Ours(Yi-6B)} & 23.28 & 76.54\\&(\textcolor{green}{+0.73})&(\textcolor{green}{+3.33}) \\
 \bottomrule
 \end{tabular}
-`;
+      `;
       const table = readTex(tex);
       expect(table.numRows).toBe(3);
-      expect(table.cells[1][2].value).toBe(76.54);
+      expect(table.cells[1][2].value).toBe('76.54');
       expect(table.cells[2][1].value).toBe('(+0.73)');
       expect(table.cells[2][2].value).toBe('(+3.33)');
     });
@@ -564,12 +564,13 @@ M & NQ & ARC-C \\
       const tex = String.raw`
 \begin{tabular}{ll}
 \toprule
-A & B \\\hline
-C & D \\\cline{1-2}
-E & F \\\bottomrule[0.8pt]
+      A & B \\\hline
+      C & D \\\cline{1-2}
+      E & F \\\bottomrule[0.8pt]
 \end{tabular}
 `;
       const table = readTex(tex);
+      expect(table.numRows).toBe(3);
       const values = table.cells.flat().map((c) => String(c.value).trim()).filter(Boolean);
       const joined = values.join(' | ').toLowerCase();
       expect(joined.includes('hline')).toBe(false);
@@ -791,8 +792,9 @@ L1 &  & R1 \\
         groupSeparators: {},
       };
       const tex = render(table);
-      expect(tex).toContain('DRF\\$_{\\\\theta}');
-      expect(tex).toContain('F\\$_{\\\\theta}');
+      expect(tex).toContain('DRF$_{\\theta}$');
+      expect(tex).toContain('F$_{\\theta}$');
+      expect(tex).not.toContain('$DRF_{\\theta}$');
     });
 
     it('test_render_special_chars', () => {

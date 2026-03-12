@@ -324,10 +324,19 @@ function parseCell(raw: string): Cell {
   value = value.replace(/\\\\([#%&])/g, '\\$1').trim();
   value = value.replace(/\\([#%&])/g, '$1').trim();
 
-  const numeric = Number(value);
-  const finalValue = Number.isFinite(numeric) && value !== '' ? numeric : value;
+  const finalValue = tryParseNumber(value) ?? value;
 
   return { value: finalValue, style, rowspan, colspan, richSegments };
+}
+
+function tryParseNumber(text: string): number | null {
+  const value = text.trim();
+  if (!value) return null;
+  if (value.startsWith('+')) return null;
+  // Match pubtab-python: preserve decimal strings so trailing zeros and exact text survive round-trips.
+  if (value.includes('.')) return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
 }
 
 const TABULAR_BEGIN = '\\begin{tabular}';
