@@ -132,4 +132,26 @@ describe('fixtures: tex -> xlsx（迁移 pubtab-python test_tex_to_xlsx_*）', (
 
     expect(mergeCount(wsGen)).toBe(mergeCount(wsOrig));
   });
+
+  it('texToExcel: tex1_sheet01 应与 tex1.xlsx 第一张 sheet 一致', async () => {
+    const dir = await mkTmpDir('pubtab-ts-fixture-tex2xlsx-');
+    const texFile = path.join(FIXTURES, 'tex1_sheet01.tex');
+    const origXlsx = path.join(FIXTURES, 'tex1.xlsx');
+    const genXlsx = path.join(dir, 'tex1_sheet01.xlsx');
+
+    await texToExcel(texFile, genXlsx);
+
+    const wbOrig = new ExcelJS.Workbook();
+    await wbOrig.xlsx.readFile(origXlsx);
+    const wbGen = new ExcelJS.Workbook();
+    await wbGen.xlsx.readFile(genXlsx);
+    const wsOrig = wbOrig.worksheets[0];
+    const wsGen = wbGen.worksheets[0];
+
+    expect(wsGen.getCell('C2').value).toBe('Relevance');
+    expect(wsGen.rowCount).toBe(wsOrig.rowCount);
+    expect(wsGen.columnCount).toBe(wsOrig.columnCount);
+    expect(compareCells(wsOrig, wsGen)).toEqual([]);
+    expect(mergeCount(wsGen)).toBe(mergeCount(wsOrig));
+  });
 });

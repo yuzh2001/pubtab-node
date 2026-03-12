@@ -742,6 +742,17 @@ function parseTabularBody(bodyRaw: string): TableData {
     while (colIdx < expectedCols && rawIdx < rawCells.length) {
       const occupied = (activeRowspans[colIdx] ?? 0) > 0;
       if (occupied) {
+        const nextRaw = rawCells[rawIdx];
+        if (nextRaw && !cellHasPayload(nextRaw) && Math.max(1, nextRaw.colspan || 1) === 1) {
+          outRow.push(emptyCell());
+          activeRowspans[colIdx] = (activeRowspans[colIdx] ?? 0) - 1;
+          if ((activeRowspans[colIdx] ?? 0) <= 0) activeRowspanPayload[colIdx] = false;
+          remainingRawWidth -= 1;
+          rawIdx += 1;
+          colIdx += 1;
+          continue;
+        }
+
         const remainingOccupied = countRemainingOccupied(activeRowspans, colIdx, expectedCols);
         const remainingFree = expectedCols - colIdx - remainingOccupied;
 
