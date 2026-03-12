@@ -38,6 +38,7 @@ export interface RenderOptions {
   position?: string;
   resizebox?: string | null;
   colSpec?: string;
+  theme?: string;
   spanColumns?: boolean;
 }
 

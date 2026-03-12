@@ -51,7 +51,7 @@ function parseArgs(args: string[]): ParsedArgs {
 function usage(): string {
   return [
     '用法:',
-    '  pubtab xlsx2tex <input> <output> [--config <yaml>] [--sheet <nameOrIndex>] [--caption <text>] [--label <text>] [--position <pos>] [--resizebox <spec>] [--colSpec <spec>] [--headerRows <n>]',
+    '  pubtab xlsx2tex <input> <output> [--config <yaml>] [--sheet <nameOrIndex>] [--theme <name>] [--caption <text>] [--label <text>] [--position <pos>] [--resizebox <spec>] [--colSpec <spec>] [--headerRows <n>]',
     '  pubtab tex2xlsx <input> <output>',
     '',
     '示例:',
@@ -153,6 +153,7 @@ function toXlsx2TexOpts(raw: ConfigRecord, overrides: Record<string, string>): X
   const result: Xlsx2TexOptions = {
     sheet: fromConfigSheet(raw.sheet),
     caption: typeof raw.caption === 'string' ? raw.caption : undefined,
+    theme: typeof raw.theme === 'string' ? raw.theme : undefined,
     label: typeof raw.label === 'string' ? raw.label : undefined,
     position: typeof raw.position === 'string' ? raw.position : undefined,
     resizebox: typeof raw.resizebox === 'string' ? raw.resizebox : undefined,
@@ -165,6 +166,9 @@ function toXlsx2TexOpts(raw: ConfigRecord, overrides: Record<string, string>): X
   }
   if (overrides.caption != null) {
     result.caption = overrides.caption;
+  }
+  if (overrides.theme != null) {
+    result.theme = overrides.theme;
   }
   if (overrides.label != null) {
     result.label = overrides.label;
@@ -216,11 +220,12 @@ export async function runCli(argv: string[], cwd: string = process.cwd()): Promi
     if (cmd === 'xlsx2tex') {
       const configPath = opts.config;
       const config = configPath ? await loadYamlConfig(path.resolve(cwd, configPath)) : {};
-      const xlsx2texOpts = toXlsx2TexOpts(config, {
-        sheet: opts.sheet,
-        caption: opts.caption,
-        label: opts.label,
-        position: opts.position,
+          const xlsx2texOpts = toXlsx2TexOpts(config, {
+            sheet: opts.sheet,
+            theme: opts.theme,
+            caption: opts.caption,
+            label: opts.label,
+            position: opts.position,
         resizebox: opts.resizebox,
         colSpec: opts.colSpec,
         headerRows: opts.headerRows,

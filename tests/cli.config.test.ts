@@ -77,6 +77,57 @@ describe('CLI 配置迁移（xlsx2tex）', () => {
     expect(tex).toContain('ROW2');
   });
 
+  it('CLI 显式 theme 覆盖 config 文件中的同名选项', async () => {
+    const dir = await mkTmpDir('pubtab-ts-cli-config-theme-');
+    const xlsxPath = await writeWorkbook(dir, 'tables.xlsx', 'A', 'B');
+    const outPath = path.join(dir, 'out.tex');
+    const cfgPath = path.join(dir, 'pubtab.yml');
+    await fs.writeFile(
+      cfgPath,
+      [
+        'theme: simple',
+      ].join('\n'),
+      'utf8',
+    );
+
+    const code = await runCli([
+      'node',
+      'pubtab',
+      'xlsx2tex',
+      xlsxPath,
+      outPath,
+      '--config',
+      cfgPath,
+      '--sheet',
+      '1',
+      '--theme',
+      'three_line',
+    ]);
+    expect(code).toBe(0);
+    const tex = await fs.readFile(outPath, 'utf8');
+    expect(tex).toContain('% \\usepackage{diagbox}');
+    expect(tex).toContain('% \\usepackage{makecell}');
+  });
+
+  it('无效 theme 会导致 CLI 失败', async () => {
+    const dir = await mkTmpDir('pubtab-ts-cli-invalid-theme-');
+    const xlsxPath = await writeWorkbook(dir, 'tables.xlsx', 'A', 'B');
+    const outPath = path.join(dir, 'out.tex');
+
+    const code = await runCli([
+      'node',
+      'pubtab',
+      'xlsx2tex',
+      xlsxPath,
+      outPath,
+      '--sheet',
+      '1',
+      '--theme',
+      'not-exist-theme',
+    ]);
+    expect(code).toBe(2);
+  });
+
   it('无效配置文件会导致 CLI 失败', async () => {
     const dir = await mkTmpDir('pubtab-ts-cli-config-invalid-');
     const xlsxPath = await writeWorkbook(dir, 'tables.xlsx', 'X', 'Y');

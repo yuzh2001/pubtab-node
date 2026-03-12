@@ -35,6 +35,10 @@ function isCellPayload(cell: Cell | undefined): boolean {
 }
 
 type MergeInfo = { mr: number; mc: number; rowspan: number; colspan: number };
+export interface ReadExcelOptions {
+  sheet?: string | number;
+  headerRows?: number | 'auto';
+}
 
 function parseA1(addr: string): { row: number; col: number } | null {
   const m = addr.match(/^([A-Za-z]+)(\d+)$/u);
@@ -158,7 +162,7 @@ function trimTrailingEmptyColsLikePython(cells: Cell[][], numCols: number): numb
       if (isCellPayload(row[colIdx])) return true;
 
       // Attribute payload from a horizontal placeholder to its left master when the
-      // master's colspan covers this column. This matches pubtab-python behavior.
+      // master's colspan covers this column. This mirrors pubtab-python behavior.
       for (let i = colIdx - 1; i >= 0; i -= 1) {
         const left = row[i];
         if ((left.colspan ?? 1) <= 1) continue;
@@ -269,6 +273,19 @@ function tableFromWorksheet(ws: ExcelJS.Worksheet, opts: Xlsx2TexOptions): Table
     headerRows,
     groupSeparators: {},
   };
+}
+
+export async function readExcel(inputFile: string, opts: ReadExcelOptions = {}): Promise<TableData> {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(inputFile);
+  const selectedSheets = opts.sheet == null
+    ? [wb.worksheets[0]]
+    : [typeof opts.sheet === 'number' ? wb.worksheets[opts.sheet] : wb.getWorksheet(opts.sheet)].filter(Boolean) as ExcelJS.Worksheet[];
+
+  if (selectedSheets.length === 0) {
+    throw new Error(`No matching sheet for selector: ${String(opts.sheet)}`);
+  }
+  return tableFromWorksheet(selectedSheets[0], { headerRows: opts.headerRows });
 }
 
 function outputPathsForSheets(inputFile: string, output: string, count: number): string[] {
